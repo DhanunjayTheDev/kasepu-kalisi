@@ -46,7 +46,7 @@ export function createCrudRouter({
   });
 
   router.patch("/:id", requireAdmin(...roles), validateBody(createSchema.partial()), async (req, res) => {
-    const item = await model.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const item = await model.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
     if (!item) throw new ApiError(404, "Not found");
     res.json({ item });
   });

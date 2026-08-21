@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CalendarDays, MapPin, ArrowRight } from "lucide-react";
+import { CalendarDays, Clock, MapPin, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate, formatCurrency } from "@/lib/format";
 import { imageForSlug } from "@/lib/media";
@@ -32,9 +32,11 @@ interface EventCardProps {
   event: EventItem;
   /** "wide" lays the card out side-by-side from sm up, for a lone featured gathering. */
   size?: "large" | "compact" | "wide";
+  /** Overrides the hashed photo so a list can guarantee distinct imagery. */
+  image?: string;
 }
 
-export function EventCard({ event, size = "compact" }: EventCardProps) {
+export function EventCard({ event, size = "compact", image }: EventCardProps) {
   const isLarge = size === "large";
   const isWide = size === "wide";
   const status = event.status as EventStatus;
@@ -44,17 +46,23 @@ export function EventCard({ event, size = "compact" }: EventCardProps) {
     <article
       className={cn(
         "group flex h-full overflow-hidden rounded-2xl border border-slate/15 bg-white transition-shadow duration-300 hover:shadow-[0_2px_24px_rgba(30,108,113,0.10)]",
-        isWide ? "flex-col sm:flex-row" : "flex-col"
+        // The wide band needs an explicit height: with an auto-height row the
+        // image's h-full resolves against nothing and it renders at full size.
+        isWide ? "flex-col sm:h-[19rem] sm:flex-row lg:h-[21rem]" : "flex-col"
       )}
     >
       <div
         className={cn(
           "relative overflow-hidden",
-          isWide ? "aspect-[4/3] sm:aspect-auto sm:w-[45%] sm:shrink-0" : isLarge ? "aspect-[16/10]" : "aspect-[4/3]"
+          isWide
+            ? "aspect-[4/3] sm:aspect-auto sm:h-full sm:w-[45%] sm:shrink-0"
+            : isLarge
+              ? "aspect-[16/10]"
+              : "aspect-[4/3]"
         )}
       >
         <img
-          src={imageForSlug(event.slug)}
+          src={image ?? imageForSlug(event.slug)}
           alt=""
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -93,11 +101,23 @@ export function EventCard({ event, size = "compact" }: EventCardProps) {
             <CalendarDays size={14} className="text-gold" />
             {formatDate(event.date)}
           </span>
+          {event.startTime && (
+            <span className="flex items-center gap-1.5">
+              <Clock size={14} className="text-gold" />
+              {event.startTime}
+              {event.endTime ? ` — ${event.endTime}` : ""}
+            </span>
+          )}
           <span className="flex items-center gap-1.5">
             <MapPin size={14} className="text-gold" />
             {event.venue.name}, {event.city}
           </span>
         </div>
+
+        {/* The wide band has room for the full pitch; compact cards don't. */}
+        {isWide && event.description && (
+          <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-slate/85">{event.description}</p>
+        )}
 
         <div className="mt-auto flex items-center justify-between gap-4 border-t border-slate/12 pt-6">
           <span className="font-sans text-sm text-slate">

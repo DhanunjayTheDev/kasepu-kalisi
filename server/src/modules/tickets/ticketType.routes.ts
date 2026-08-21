@@ -52,7 +52,7 @@ ticketTypeRouter.patch(
     const before = await TicketType.findById(req.params.id);
     if (!before) throw new ApiError(404, "Ticket type not found");
 
-    const ticketType = await TicketType.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const ticketType = await TicketType.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
 
     await recordAuditLog({
       actor: req.auth!.sub,

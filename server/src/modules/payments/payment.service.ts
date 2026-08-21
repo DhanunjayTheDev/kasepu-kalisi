@@ -25,7 +25,7 @@ export async function confirmBookingPayment(details: RazorpayPaymentDetails) {
       method: details.method,
       webhookProcessedAt: new Date(),
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!payment) return null; // Already processed or unknown order — nothing to do.
@@ -50,7 +50,7 @@ export async function markBookingPaymentFailed(razorpayOrderId: string) {
   const payment = await Payment.findOneAndUpdate(
     { razorpayOrderId, status: { $in: ["created", "pending", "authorized"] } },
     { status: "failed" },
-    { new: true }
+    { returnDocument: "after" }
   );
   if (!payment) return null;
 

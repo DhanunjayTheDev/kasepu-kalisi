@@ -72,7 +72,7 @@ refundRouter.post(
 );
 
 refundRouter.post("/:id/reject", requireAdmin("super_admin", "finance_manager"), async (req, res) => {
-  const refund = await Refund.findByIdAndUpdate(req.params.id, { status: "rejected" }, { new: true });
+  const refund = await Refund.findByIdAndUpdate(req.params.id, { status: "rejected" }, { returnDocument: "after" });
   if (!refund) throw new ApiError(404, "Refund request not found");
 
   await recordAuditLog({ actor: req.auth!.sub, action: "refund.rejected", resource: refund.id });

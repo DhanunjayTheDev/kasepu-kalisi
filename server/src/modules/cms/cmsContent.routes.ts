@@ -23,7 +23,7 @@ cmsContentRouter.patch(
     const content = await CmsContent.findOneAndUpdate(
       { key: req.params.key },
       { data: req.body.data },
-      { new: true, upsert: true }
+      { returnDocument: "after", upsert: true }
     );
     res.json({ content });
   }

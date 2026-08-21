@@ -52,7 +52,7 @@ announcementRouter.patch(
   requireAdmin("super_admin", "event_manager"),
   validateBody(createSchema.partial()),
   async (req, res) => {
-    const announcement = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const announcement = await Announcement.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
     if (!announcement) throw new ApiError(404, "Announcement not found");
     res.json({ announcement });
   }

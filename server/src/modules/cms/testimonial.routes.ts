@@ -37,7 +37,7 @@ testimonialRouter.post("/", requireAdmin(...ROLES), validateBody(testimonialSche
 });
 
 testimonialRouter.patch("/:id", requireAdmin(...ROLES), validateBody(testimonialSchema.partial()), async (req, res) => {
-  const item = await Testimonial.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const item = await Testimonial.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
   if (!item) throw new ApiError(404, "Testimonial not found");
 
   await recordAuditLog({ actor: req.auth!.sub, action: "testimonial.updated", resource: String(req.params.id) });

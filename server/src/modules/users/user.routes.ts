@@ -22,7 +22,7 @@ const updateProfileSchema = z.object({
 });
 
 userRouter.patch("/me", requireUser, validateBody(updateProfileSchema), async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.auth!.sub, req.body, { new: true });
+  const user = await User.findByIdAndUpdate(req.auth!.sub, req.body, { returnDocument: "after" });
   if (!user) throw new ApiError(404, "User not found");
   res.json({ user });
 });

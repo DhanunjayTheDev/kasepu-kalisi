@@ -39,7 +39,7 @@ supportTicketRouter.patch(
   requireAdmin("super_admin", "support_staff"),
   validateBody(updateSchema),
   async (req, res) => {
-    const ticket = await SupportTicket.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const ticket = await SupportTicket.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
     if (!ticket) throw new ApiError(404, "Support ticket not found");
     res.json({ ticket });
   }

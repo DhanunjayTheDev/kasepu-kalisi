@@ -92,7 +92,7 @@ eventRouter.patch(
     const before = await Event.findById(req.params.id);
     if (!before) throw new ApiError(404, "Event not found");
 
-    const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const event = await Event.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
 
     await recordAuditLog({
       actor: req.auth!.sub,

@@ -15,7 +15,7 @@ export async function reserveInventory(ticketTypeId: string, quantity: number) {
       $expr: { $lte: [{ $add: ["$sold", "$reserved", quantity] }, "$capacity"] },
     },
     { $inc: { reserved: quantity } },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!ticketType) {

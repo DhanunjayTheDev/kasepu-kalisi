@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
 import { Button } from "@/components/button";
 import { Logo } from "@/components/logo";
+import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/lib/use-page-title";
 import { useCmsContent, useEvents } from "@/lib/queries";
 import { formatDate } from "@/lib/format";
@@ -64,14 +65,14 @@ export default function AboutPage() {
         />
         <div aria-hidden className="absolute inset-0 -z-10 bg-teal/80" />
 
-        <div className="container-kk relative py-16 text-center sm:py-24 lg:py-28">
+        <div className="container-kk relative py-20 text-center sm:py-28 lg:py-36">
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="flex justify-center">
-              <Logo mono className="h-12 sm:h-16" />
+              <Logo mono className="h-14 sm:h-20" />
             </div>
 
             <span className="eyebrow mt-8 flex items-center justify-center gap-3 text-gold">
@@ -80,7 +81,7 @@ export default function AboutPage() {
               <span className="rule-gold" aria-hidden />
             </span>
 
-            <h1 className="mx-auto mt-6 max-w-3xl text-[2.1rem] leading-[1.08] text-ivory xs:text-4xl sm:text-5xl lg:text-6xl">
+            <h1 className="mx-auto mt-6 max-w-4xl text-[2.4rem] leading-[1.05] text-ivory xs:text-5xl sm:text-6xl lg:text-7xl">
               {headingFirst}.
               {headingRest.length > 0 && (
                 <>
@@ -98,40 +99,52 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Belief — asymmetric, image breaking the grid. */}
+      {/* Belief — a centred statement. A short CMS quote beside a portrait left a
+          large void, so the words lead and the imagery sits under them as a band. */}
       <section className="py-14 sm:py-20 lg:py-28">
-        <div className="container-kk grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-14">
-          <motion.div
-            initial={{ opacity: 0, x: -16 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="lg:col-span-5"
-          >
-            <div className="overflow-hidden rounded-2xl lg:-mr-10">
-              <img
-                src={media.tableWithFlowers}
-                alt=""
-                loading="lazy"
-                className="aspect-[4/5] w-full object-cover"
-              />
-            </div>
-          </motion.div>
-
-          <motion.div
+        <div className="container-kk">
+          <motion.figure
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-            className="lg:col-span-7"
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="mx-auto max-w-3xl text-center"
           >
-            <Quote size={30} className="text-gold" aria-hidden />
-            <p className="mt-6 font-display text-2xl italic leading-relaxed text-teal sm:text-3xl lg:text-[2.1rem]">
+            <Quote size={32} className="mx-auto text-gold" aria-hidden />
+            <blockquote className="mt-7 font-display text-2xl italic leading-[1.35] text-teal sm:text-[2rem] lg:text-[2.6rem]">
               {belief}
-            </p>
-            <span className="mt-8 block h-px w-16 bg-terracotta" aria-hidden />
-            <p className="mt-4 font-sans text-sm text-slate">The Kasepu Kalisi team</p>
-          </motion.div>
+            </blockquote>
+            <figcaption className="mt-8">
+              <span className="mx-auto block h-px w-16 bg-terracotta" aria-hidden />
+              <span className="mt-4 block font-sans text-sm text-slate">The Kasepu Kalisi team</span>
+            </figcaption>
+          </motion.figure>
+
+          <div className="mt-12 grid grid-cols-2 gap-4 sm:mt-16 sm:gap-6 lg:grid-cols-4">
+            {[media.tableWithFlowers, media.outdoorGathering, media.wineToast, media.dinnerPlate].map(
+              (src, index) => (
+                <motion.div
+                  key={src}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-70px" }}
+                  transition={{ duration: 0.6, delay: index * 0.07, ease: "easeOut" }}
+                  className={cn(
+                    "group overflow-hidden rounded-2xl",
+                    // Staggered heights stop the row reading as four identical boxes.
+                    index % 2 === 0 ? "lg:mt-8" : ""
+                  )}
+                >
+                  <img
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-[3/4] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </motion.div>
+              )
+            )}
+          </div>
         </div>
       </section>
 
@@ -153,7 +166,7 @@ export default function AboutPage() {
             </h2>
           </motion.div>
 
-          <div className="mt-10 grid gap-6 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {PILLARS.map((pillar, index) => (
               <motion.article
                 key={pillar.title}
@@ -163,7 +176,7 @@ export default function AboutPage() {
                 transition={{ duration: 0.6, delay: index * 0.08, ease: "easeOut" }}
                 className="group overflow-hidden rounded-2xl border border-slate/12 bg-ivory"
               >
-                <div className="aspect-[4/3] overflow-hidden">
+                <div className="aspect-[4/5] overflow-hidden">
                   <img
                     src={pillar.image}
                     alt=""

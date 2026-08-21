@@ -46,7 +46,7 @@ couponRouter.patch(
   requireAdmin("super_admin", "finance_manager"),
   validateBody(createSchema.partial()),
   async (req, res) => {
-    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
     if (!coupon) throw new ApiError(404, "Coupon not found");
     res.json({ coupon });
   }

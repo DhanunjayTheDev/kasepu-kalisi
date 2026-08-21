@@ -51,7 +51,7 @@ staffRouter.patch("/:id", requireAdmin("super_admin"), validateBody(updateRoleSc
   const before = await Staff.findById(req.params.id).select("-passwordHash");
   if (!before) throw new ApiError(404, "Staff member not found");
 
-  const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, { new: true }).select("-passwordHash");
+  const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" }).select("-passwordHash");
 
   await recordAuditLog({
     actor: req.auth!.sub,

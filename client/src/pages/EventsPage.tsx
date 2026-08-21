@@ -5,11 +5,13 @@ import { LoadingState, ErrorState, EmptyState } from "@/components/query-states"
 import { useEvents } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/lib/use-page-title";
-import { media } from "@/lib/media";
+import { distinctImagesForSlugs, media } from "@/lib/media";
 
 export default function EventsPage() {
   usePageTitle("Gatherings", "Discover upcoming Kasepu Kalisi gatherings across India.");
   const { data: events, isLoading, isError } = useEvents();
+  // Guarantees no two cards in the grid land on the same stock photo.
+  const images = distinctImagesForSlugs((events ?? []).map((e) => e.slug));
 
   return (
     <>
@@ -36,7 +38,7 @@ export default function EventsPage() {
             </p>
             {/* A lone gathering gets a wide card — a 2-up grid would leave half the row empty. */}
             {events.length === 1 ? (
-              <EventCard event={events[0]} size="wide" />
+              <EventCard event={events[0]} size="wide" image={images[events[0].slug]} />
             ) : (
               <div
                 className={cn(
@@ -45,7 +47,7 @@ export default function EventsPage() {
                 )}
               >
                 {events.map((event) => (
-                  <EventCard key={event.slug} event={event} />
+                  <EventCard key={event.slug} event={event} image={images[event.slug]} />
                 ))}
               </div>
             )}

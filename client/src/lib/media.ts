@@ -44,7 +44,48 @@ export const galleryStock = [
   media.dinnerPlate,
 ];
 
+/**
+ * djb2 — summing char codes collided constantly (anagram-ish slugs like
+ * "…-chennai-2025" and "…-bengaluru-2026" landed on the same photo).
+ */
+function hashString(value: string) {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i++) {
+    hash = ((hash << 5) + hash + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
 export function imageForSlug(slug: string) {
-  const hash = Array.from(slug).reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return galleryStock[hash % galleryStock.length];
+  return galleryStock[hashString(slug) % galleryStock.length];
+}
+
+/**
+ * Picks a photo per slug while guaranteeing no two entries in the same list
+ * share one — a hash alone can't promise that, and repeated images in a grid
+ * read as a bug.
+ */
+export function distinctImagesForSlugs(slugs: string[]): Record<string, string> {
+  const used = new Set<string>();
+  const result: Record<string, string> = {};
+
+  for (const slug of slugs) {
+    const start = hashString(slug) % galleryStock.length;
+    let chosen = galleryStock[start];
+
+    // Walk forward until an unused photo turns up; if every photo is taken
+    // (more items than photos) fall back to the hashed pick.
+    for (let offset = 0; offset < galleryStock.length; offset++) {
+      const candidate = galleryStock[(start + offset) % galleryStock.length];
+      if (!used.has(candidate)) {
+        chosen = candidate;
+        break;
+      }
+    }
+
+    used.add(chosen);
+    result[slug] = chosen;
+  }
+
+  return result;
 }
