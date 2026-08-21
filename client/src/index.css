@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  /* Kasepu Kalisi brand tokens — do not introduce colors outside this set */
+  --color-ivory: #f7f1e9;
+  --color-teal: #1e6c71;
+  --color-terracotta: #db734d;
+  --color-gold: #e8b03f;
+  --color-slate: #5c777f;
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "DM Sans", sans-serif;
+
+  /* Breakpoints. xs/sm cover small and large phones, md tablets, lg+ desktop.
+     Tailwind's defaults are kept so existing sm:/md:/lg: usage is unchanged. */
+  --breakpoint-xs: 26rem; /* 416px — large phones */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px — tablet portrait */
+  --breakpoint-lg: 64rem; /* 1024px — tablet landscape / small laptop */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 96rem; /* 1536px */
+  --breakpoint-3xl: 120rem; /* 1920px — large desktop */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Stops iOS bumping up font sizes in landscape. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ivory text-slate font-sans antialiased;
+    /* Native-app feel: no blue flash on tap, no accidental horizontal scroll. */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-teal;
+  }
+
+  /* iOS zooms the page when a focused input's text is under 16px. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  @media (min-width: 40rem) {
+    input,
+    select,
+    textarea {
+      font-size: inherit;
+    }
+  }
+
+  /* Images should never be the thing that forces a horizontal scrollbar. */
+  img,
+  video,
+  svg {
+    max-width: 100%;
+  }
+}
+
+@layer utilities {
+  .container-kk {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-6 md:px-10 3xl:max-w-[100rem];
+  }
+
+  .eyebrow {
+    @apply font-sans text-[11px] font-semibold uppercase tracking-[0.18em] sm:text-xs sm:tracking-[0.2em];
+  }
+
+  /* Safe-area helpers for notched devices. */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Height of the mobile tab bar, so page content can clear it. */
+  .pb-tabbar {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+
+  /* Horizontal snap rail used for mobile card carousels. */
+  .snap-rail {
+    @apply flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .snap-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .snap-rail > * {
+    @apply shrink-0 snap-start;
+  }
+
+  /* Minimum comfortable touch target on coarse pointers. */
+  .tap-target {
+    @apply min-h-11 min-w-11;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

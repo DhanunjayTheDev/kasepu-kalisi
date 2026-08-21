@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  /* Kasepu Kalisi brand tokens — shared with client, admin skews functional not decorative */
+  --color-ivory: #f7f1e9;
+  --color-teal: #1e6c71;
+  --color-terracotta: #db734d;
+  --color-gold: #e8b03f;
+  --color-slate: #5c777f;
+
+  --font-sans: "DM Sans", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-ivory text-teal font-sans antialiased;
+  }
+}
