@@ -1,6 +1,7 @@
 // Development seed data only — never run against a production database.
 // Populates every collection so each admin screen and public page has realistic rows.
 import bcrypt from "bcryptjs";
+import type { Model } from "mongoose";
 import { connectDatabase, disconnectDatabase } from "./config/db";
 import { Staff } from "./modules/staff/staff.model";
 import { User } from "./modules/users/user.model";
@@ -25,10 +26,12 @@ import { EmailLog } from "./modules/email/emailLog.model";
 import { WhatsAppLog } from "./modules/whatsapp/whatsappLog.model";
 import { AuditLog } from "./modules/auditLogs/auditLog.model";
 import { SupportTicket } from "./modules/support/supportTicket.model";
-import { getSettings } from "./modules/settings/settings.model";
-import { getCmsContent } from "./modules/cms/cmsContent.model";
+import { Settings, getSettings } from "./modules/settings/settings.model";
+import { CmsContent, getCmsContent } from "./modules/cms/cmsContent.model";
 import { FaqItem } from "./modules/cms/faqItem.model";
 import { Testimonial } from "./modules/cms/testimonial.model";
+import { Counter } from "./utils/counter.model";
+import { env } from "./config/env";
 import { generateBookingId, generateTicketId } from "./utils/ids";
 import type { BookingStatus } from "./types/enums";
 import { generateQrToken } from "./utils/qr-token";
@@ -39,45 +42,96 @@ function daysFromNow(days: number) {
   return new Date(Date.now() + days * 86_400_000);
 }
 
+/**
+ * Every collection the seed owns. Listed explicitly rather than dropping the
+ * whole database, so anything this script didn't create is left untouched.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SEEDED_MODELS: Model<any>[] = [
+  Staff,
+  User,
+  Event,
+  TicketType,
+  Ticket,
+  Schedule,
+  Artist,
+  MenuItem,
+  GalleryItem,
+  Coupon,
+  Booking,
+  Attendee,
+  Payment,
+  Refund,
+  Invoice,
+  CheckIn,
+  Waitlist,
+  Announcement,
+  Notification,
+  EmailLog,
+  WhatsAppLog,
+  AuditLog,
+  SupportTicket,
+  FaqItem,
+  Testimonial,
+  CmsContent,
+  Settings,
+  Counter,
+];
+
+async function resetSeededCollections() {
+  let removed = 0;
+  for (const model of SEEDED_MODELS) {
+    const result = await model.deleteMany({});
+    removed += result.deletedCount ?? 0;
+  }
+  console.log(`Cleared ${removed} existing documents across ${SEEDED_MODELS.length} collections.`);
+}
+
 async function seed() {
+  // This script is destructive. Refuse to touch a production database unless
+  // the caller opts in explicitly with --force.
+  if (env.NODE_ENV === "production" && !process.argv.includes("--force")) {
+    console.error(
+      "Refusing to run: NODE_ENV=production. This seed DELETES all existing data.\n" +
+        "Re-run with --force only if you genuinely intend to wipe the production database."
+    );
+    process.exit(1);
+  }
+
   await connectDatabase();
+
+  const dbName = new URL(env.DATABASE_URL.replace("mongodb+srv://", "https://").replace("mongodb://", "http://"))
+    .pathname.replace("/", "");
+  console.log(`Re-seeding database "${dbName}" — all existing seeded data will be erased.`);
+
+  await resetSeededCollections();
+
   await getSettings();
 
   // Materialises the homepage/about/contact defaults so the CMS editors open with content.
   await Promise.all(["homepage", "about", "contact"].map((key) => getCmsContent(key)));
 
   // ---------------------------------------------------------------- staff
-  let superAdmin = await Staff.findOne({ email: "admin@kasepukalisi.com" });
-  if (!superAdmin) {
-    const passwordHash = await bcrypt.hash("ChangeMe123!", 10);
-    superAdmin = await Staff.create({
-      name: "Super Admin",
-      email: "admin@kasepukalisi.com",
-      passwordHash,
-      role: "super_admin",
-      status: "active",
-    });
+  const passwordHash = await bcrypt.hash("ChangeMe123!", 10);
+  const superAdmin = await Staff.create({
+    name: "Super Admin",
+    email: "admin@kasepukalisi.com",
+    passwordHash,
+    role: "super_admin",
+    status: "active",
+  });
 
-    await Staff.insertMany([
-      { name: "Divya Menon", email: "divya@kasepukalisi.com", passwordHash, role: "event_manager", status: "active" },
-      { name: "Rohit Bansal", email: "rohit@kasepukalisi.com", passwordHash, role: "finance_manager", status: "active" },
-      { name: "Priya Iyer", email: "priya@kasepukalisi.com", passwordHash, role: "registration_manager", status: "active" },
-      { name: "Sameer Khan", email: "sameer@kasepukalisi.com", passwordHash, role: "checkin_staff", status: "active" },
-      { name: "Nikita Rao", email: "nikita@kasepukalisi.com", passwordHash, role: "content_manager", status: "invited" },
-      { name: "Farhan Ali", email: "farhan@kasepukalisi.com", passwordHash, role: "support_staff", status: "active" },
-    ]);
-    console.log("Seeded staff. Admin login: admin@kasepukalisi.com / ChangeMe123! (change this immediately)");
-  }
+  await Staff.insertMany([
+    { name: "Divya Menon", email: "divya@kasepukalisi.com", passwordHash, role: "event_manager", status: "active" },
+    { name: "Rohit Bansal", email: "rohit@kasepukalisi.com", passwordHash, role: "finance_manager", status: "active" },
+    { name: "Priya Iyer", email: "priya@kasepukalisi.com", passwordHash, role: "registration_manager", status: "active" },
+    { name: "Sameer Khan", email: "sameer@kasepukalisi.com", passwordHash, role: "checkin_staff", status: "active" },
+    { name: "Nikita Rao", email: "nikita@kasepukalisi.com", passwordHash, role: "content_manager", status: "invited" },
+    { name: "Farhan Ali", email: "farhan@kasepukalisi.com", passwordHash, role: "support_staff", status: "active" },
+  ]);
+  console.log("Seeded staff. Admin login: admin@kasepukalisi.com / ChangeMe123! (change this immediately)");
 
   const checkinStaff = (await Staff.findOne({ role: "checkin_staff" })) ?? superAdmin;
-
-  // Everything below hangs off the flagship event; if it exists the seed already ran.
-  const alreadySeeded = await Event.findOne({ slug: "kasepu-kalisi-bengaluru-2026" });
-  if (alreadySeeded) {
-    console.log("Demo data already exists, skipping.");
-    await disconnectDatabase();
-    return;
-  }
 
   // --------------------------------------------------------------- events
   const [bengaluru, hyderabad, chennai] = await Event.create([

@@ -10,7 +10,7 @@ const counterSchema = new Schema<CounterDoc>({
   seq: { type: Number, default: 0 },
 });
 
-const Counter = model<CounterDoc>("Counter", counterSchema);
+export const Counter = model<CounterDoc>("Counter", counterSchema);
 
 export async function getNextSequence(key: string): Promise<number> {
   const doc = await Counter.findByIdAndUpdate(

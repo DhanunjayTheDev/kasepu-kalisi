@@ -36,6 +36,11 @@ const envSchema = z.object({
   ADMIN_URL: z.string().url().default("http://localhost:3001"),
   SERVER_URL: z.string().url().default("http://localhost:4000"),
 
+  // Comma-separated extra browser origins allowed to call the API, on top of
+  // CLIENT_URL and ADMIN_URL. Needed once the front-ends are deployed, since
+  // their production origins differ from the local dev ones.
+  CORS_ORIGINS: z.string().optional(),
+
   TICKET_RESERVATION_TTL_SECONDS: z.coerce.number().default(600),
   OTP_TTL_SECONDS: z.coerce.number().default(300),
   OTP_RATE_LIMIT_PER_HOUR: z.coerce.number().default(5),

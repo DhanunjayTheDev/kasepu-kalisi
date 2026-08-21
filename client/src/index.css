@@ -110,6 +110,28 @@
   .tap-target {
     @apply min-h-11 min-w-11;
   }
+
+  /* Fine paper grain. SVG turbulence, not a gradient — the brand forbids those,
+     but this gives flat ivory/teal panels the tooth of printed stock. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.14'/%3E%3C/svg%3E");
+  }
+
+  /* Hairline gold rule used to open editorial sections. */
+  .rule-gold {
+    @apply block h-px w-10 bg-gold;
+  }
+
+  /* Oversized section numeral, set in the display face. */
+  .numeral {
+    @apply font-display leading-none text-slate/20;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

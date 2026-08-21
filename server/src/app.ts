@@ -43,8 +43,31 @@ import { testimonialRouter } from "./modules/cms/testimonial.routes";
 
 export const app = express();
 
+/**
+ * Allowed browser origins, entirely env-driven: CLIENT_URL, ADMIN_URL and any
+ * comma-separated extras in CORS_ORIGINS. Trailing slashes are stripped because
+ * a browser's Origin header never has one, but hand-written env values often do.
+ */
+const allowedOrigins = [env.CLIENT_URL, env.ADMIN_URL, ...(env.CORS_ORIGINS?.split(",") ?? [])]
+  .map((value) => value.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
 app.use(helmet());
-app.use(cors({ origin: [env.CLIENT_URL, env.ADMIN_URL], credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Requests without an Origin (curl, server-to-server, webhooks) aren't
+      // subject to the browser same-origin policy, so there's nothing to block.
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin.replace(/\/+$/, ""))) return callback(null, true);
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    credentials: true,
+  })
+);
+
+console.log(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
 
 // Mounted before express.json() — Razorpay's webhook signature is computed over
 // the raw request bytes, so this route must never see a parsed body.
