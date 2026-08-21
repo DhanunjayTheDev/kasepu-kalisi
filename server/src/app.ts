@@ -61,7 +61,11 @@ app.use(
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin.replace(/\/+$/, ""))) return callback(null, true);
-      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+
+      // Deny by omitting the header rather than throwing: the browser blocks the
+      // response either way, and this keeps disallowed origins out of the 5xx logs.
+      console.warn(`CORS: blocked origin ${origin} (add it to CORS_ORIGINS to allow)`);
+      callback(null, false);
     },
     credentials: true,
   })

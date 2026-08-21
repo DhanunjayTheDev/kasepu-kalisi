@@ -1,0 +1,46 @@
+# Render Blueprint for the Kasepu Kalisi API.
+#
+# The API compiles TypeScript at deploy time, so the build needs TypeScript and
+# the @types packages present. Render sets NODE_ENV=production, which makes a
+# plain `npm install` skip devDependencies — that is what produced
+# "Exited with status 127" (tsc: command not found). Two things guard against it:
+#   1. the build command below installs dev dependencies explicitly, and
+#   2. server/package.json keeps the build-time packages in `dependencies`.
+services:
+  - type: web
+    name: kasepu-kalisi-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Secrets and URLs are set in the Render dashboard, never committed.
+      # CORS_ORIGINS must list every deployed front-end origin, comma-separated
+      # and without trailing slashes, e.g.
+      #   https://kasepu-kalisi.vercel.app,https://admin-kasepu-kalisi.vercel.app
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: ADMIN_URL
+        sync: false
+      - key: SERVER_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
